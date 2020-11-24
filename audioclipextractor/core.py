@@ -89,40 +89,48 @@ class AudioClipExtractor(object):
         if zip_file:
             zip_file.close()
 
-    def _extract_clip_data(self, audio_clip_spec, show_logs=False):
-        """Extracts a single clip according to audioClipSpec.
+        def _extract_clip_data(self, audio_clip_spec, show_logs=False):
+            """Extracts a single clip according to audioClipSpec.
 
-        Arguments:
-            audio_clip_spec (AudioClipSpec): Clip specification
-            show_logs (bool): Show ffmpeg output
-        """
-        command = [self._ffmpeg_path]
+            Arguments:
+                audio_clip_spec (AudioClipSpec): Clip specification
+                show_logs (bool): Show ffmpeg output
+            """
+            command = [self._ffmpeg_path]
 
-        if not show_logs:
-            command += ['-nostats', '-loglevel', '0']
+            if not show_logs:
+                command += ['-nostats', '-loglevel', '0']
 
-        command += [
-            '-i', self._audioFilePath,
-            '-ss', '%.3f' % audio_clip_spec.start,
-            '-t', '%.3f' % audio_clip_spec.duration(),
-            '-c', 'copy',
-            '-map', '0',
-            '-acodec', 'libmp3lame',
-            '-ab', self._bitrate,
-            '-f', 'mp3'
-        ]
+            command += [
+                '-i', self._audioFilePath,
+                '-ss', '%.3f' % audio_clip_spec.start,
+                '-t', '%.3f' % audio_clip_spec.duration(),
+                '-c', 'copy',
+                '-map', '0',
+                '-acodec', 'libmp3lame',
+                '-ab', self._bitrate,
+                '-f', 'mp3'
+            ]
 
-        # Add clip TEXT as metadata and set a few more to default
-        metadata = {self._textMetadataName: audio_clip_spec.text,
-                    self._textMetadataTrack: audio_clip_spec.track}
+            # Add clip TEXT as metadata and set a few more to default
+            print(deescape(audio_clip_spec.text))
+            metadata = {self._textMetadataName: deescape(audio_clip_spec.text),
+                        self._textMetadataTrack: audio_clip_spec.track}
 
-        for k, v in metadata.items():
-            command.append('-metadata')
-            command.append("{}='{}'".format(k, v))
+            for k, v in metadata.items():
+                command.append('-metadata')
+                command.append("{}={}".format(k, v))
 
-        command.append('pipe:1')
+            command.append('pipe:1')
+            print(command)
+            return subprocess.check_output(command)
 
-        return subprocess.check_output(command)
+
+def deescape(escaped):
+    if "\\u0026" in escaped:
+        return escaped.encode().decode('unicode_escape')
+    else:
+        return escaped
 
 
 def slugify_filename(filename):
@@ -142,7 +150,7 @@ def slugify_filename(filename):
 
     if 0 < ext_dot_index < len(filename) - 1:
         ext = slugify(filename[ext_dot_index:])
-        filename = filename[:ext_dot_index+1]
+        filename = filename[:ext_dot_index + 1]
 
         return slugify(filename) + unicode(".") + ext
     else:
