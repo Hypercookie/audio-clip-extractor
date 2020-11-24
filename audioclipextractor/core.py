@@ -122,7 +122,7 @@ class AudioClipExtractor(object):
                 command.append("{}={}".format(k, v))
 
             command.append('pipe:1')
-            print(command)
+            #print(command)
             return subprocess.check_output(command)
 
 
