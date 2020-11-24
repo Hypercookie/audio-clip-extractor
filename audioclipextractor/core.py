@@ -89,7 +89,7 @@ class AudioClipExtractor(object):
         if zip_file:
             zip_file.close()
 
-        def _extract_clip_data(self, audio_clip_spec, show_logs=False):
+    def _extract_clip_data(self, audio_clip_spec, show_logs=False):
             """Extracts a single clip according to audioClipSpec.
 
             Arguments:
